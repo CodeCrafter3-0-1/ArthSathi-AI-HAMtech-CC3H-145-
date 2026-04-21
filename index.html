@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>💳 ArthSathi App</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#050912;
+  --bg2:#0d1525;
+  --bg3:#111d35;
+  --card:#0f1f3d;
+  --card2:#152444;
+  --border:#1e3060;
+  --accent:#3b82f6;
+  --accent2:#6366f1;
+  --accent3:#8b5cf6;
+  --gold:#f59e0b;
+  --green:#10b981;
+  --red:#ef4444;
+  --text:#e2e8f0;
+  --text2:#94a3b8;
+  --glow:rgba(99,102,241,0.3);
+}
+.light-mode{
+  --bg:#f0f4ff;
+  --bg2:#e8eeff;
+  --bg3:#dde5ff;
+  --card:#ffffff;
+  --card2:#f5f7ff;
+  --border:#c7d2fe;
+  --text:#1e293b;
+  --text2:#64748b;
+  --glow:rgba(99,102,241,0.15);
+}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+h1,h2,h3,.font-display{font-family:'Syne',sans-serif;}
+.glass{
+  background:rgba(15,31,61,0.7);
+  backdrop-filter:blur(20px);
+  border:1px solid var(--border);
+}
+.light-mode .glass{
+  background:rgba(255,255,255,0.8);
+}
+.glow-btn{
+  background:linear-gradient(135deg,var(--accent2),var(--accent));
+  box-shadow:0 0 20px var(--glow);
+  transition:all 0.3s;
+}
+.glow-btn:hover{box-shadow:0 0 35px var(--glow);transform:translateY(-1px);}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  transition:all 0.3s;
+}
+.card:hover{border-color:var(--accent2);box-shadow:0 0 20px var(--glow);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes bounceIn{0%{transform:scale(0.8);opacity:0}60%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+@keyframes streak{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
+.fade-in{animation:fadeIn 0.4s ease both;}
+.bounce-in{animation:bounceIn 0.5s ease both;}
+.shimmer-bg{
+  background:linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.5s infinite;
+}
+.progress-bar{
+  height:8px;
+  border-radius:99px;
+  background:var(--bg2);
+  overflow:hidden;
+}
+.progress-fill{
+  height:100%;
+  border-radius:99px;
+  transition:width 1s ease;
+}
+input,select{
+  background:var(--bg3)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:10px;
+  padding:10px 14px;
+  font-family:'DM Sans',sans-serif;
+  font-size:14px;
+  outline:none;
+  transition:border 0.2s;
+}
+input:focus,select:focus{border-color:var(--accent2)!important;box-shadow:0 0 0 3px var(--glow);}
+input::placeholder{color:var(--text2)!important;}
+.badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 10px;border-radius:99px;
+  font-size:11px;font-weight:600;letter-spacing:0.05em;
+}
+.nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:8px 16px;border-radius:12px;cursor:pointer;
+  transition:all 0.2s;font-size:10px;font-weight:600;
+  color:var(--text2);flex:1;
+}
+.nav-item.active{color:var(--accent);background:rgba(99,102,241,0.1);}
+.nav-item:hover{color:var(--text);}
+.streak-fire{animation:pulse 1s ease infinite;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.hero-gradient{
+  background:linear-gradient(135deg,#1e3a8a,#312e81,#4c1d95);
+  position:relative;overflow:hidden;
+}
+.hero-gradient::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 70% 50%,rgba(99,102,241,0.3),transparent 60%);
+}
+.risk-safe{background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3);}
+.risk-warn{background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);}
+.risk-danger{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);}
+.split-card{border-left:3px solid var(--accent2);}
+.tab-btn{
+  padding:8px 16px;border-radius:10px;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all 0.2s;color:var(--text2);
+}
+.tab-btn.active{background:var(--accent2);color:white;}
+.toast{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;
+  z-index:9999;animation:bounceIn 0.4s ease;
+  box-shadow:0 10px 40px rgba(0,0,0,0.5);
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback} = React;
+
+/* ─── CONSTANTS ─── */
+const ADMIN_USER = "admin";
+const ADMIN_PASS = "admin123";
+const CATEGORIES = ["Food","Travel","Bills","Shopping","Health","Entertainment","Rent","Subscriptions","Other"];
+const CAT_ICONS = {Food:"🍔",Travel:"✈️",Bills:"⚡",Shopping:"🛍️",Health:"💊",Entertainment:"🎬",Rent:"🏠",Subscriptions:"📱",Other:"💼"};
+const CAT_COLORS = {Food:"#f59e0b",Travel:"#06b6d4",Bills:"#ef4444",Shopping:"#ec4899",Health:"#10b981",Entertainment:"#8b5cf6",Rent:"#f97316",Subscriptions:"#3b82f6",Other:"#94a3b8"};
+const BADGES = [
+  {id:"saver",icon:"🏆",name:"Smart Saver",desc:"Stayed under budget 7 days"},
+  {id:"streak",icon:"🔥",name:"Streak Master",desc:"7-day saving streak"},
+  {id:"king",icon:"💰",name:"Budget King",desc:"Added 20+ expenses"},
+  {id:"analyst",icon:"📊",name:"Data Analyst",desc:"Used analytics 5 times"},
+  {id:"social",icon:"👥",name:"Social Saver",desc:"Created a group"},
+];
+const XP_PER_LEVEL = 200;
+
+/* ─── HELPERS ─── */
+const ls = (k,d=null)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}};
+const lss = (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
+const fmtMoney = (n,cur="₹")=>`${cur}${Math.abs(n).toLocaleString('en-IN')}`;
+const today = ()=>new Date().toISOString().split('T')[0];
+const daysAgo = (d)=>{const t=new Date();t.setDate(t.getDate()-d);return t.toISOString().split('T')[0];};
+const randId = ()=>Math.random().toString(36).slice(2,8);
+
+/* ─── SMS PARSER ─── */
+function parseSMS(txt){
+  const amtMatch = txt.match(/₹\s?(\d+(?:,\d+)*(?:\.\d{1,2})?)/);
+  const amt = amtMatch?parseFloat(amtMatch[1].replace(/,/g,'')):null;
+  let cat="Other";
+  const low=txt.toLowerCase();
+  if(/swiggy|zomato|food|restaurant|cafe|pizza|burger/.test(low)) cat="Food";
+  else if(/uber|ola|flight|travel|train|metro|bus/.test(low)) cat="Travel";
+  else if(/netflix|spotify|amazon|prime|subscription/.test(low)) cat="Subscriptions";
+  else if(/electricity|bill|water|gas|recharge/.test(low)) cat="Bills";
+  else if(/amazon|flipkart|myntra|shop/.test(low)) cat="Shopping";
+  else if(/hospital|pharmacy|medicine|health|doctor/.test(low)) cat="Health";
+  return {amt,cat};
+}
+
+/* ─── SPENDING PERSONALITY ─── */
+function detectPersonality(expenses){
+  if(!expenses.length) return {type:"New User",icon:"🌱",color:"#10b981",tip:"Start tracking to get insights!"};
+  const total = expenses.reduce((s,e)=>s+e.amount,0);
+  const avg = total/expenses.length;
+  const catCounts = {};
+  expenses.forEach(e=>catCounts[e.category]=(catCounts[e.category]||0)+1);
+  const topCat = Object.entries(catCounts).sort((a,b)=>b[1]-a[1])[0]?.[0]||"Other";
+  const impulsive = ["Shopping","Entertainment","Food"];
+  const impulseRatio = expenses.filter(e=>impulsive.includes(e.category)).length/expenses.length;
+  if(impulseRatio>0.6) return {type:"Impulsive Spender",icon:"🔥",color:"#ef4444",tip:"Try the 48-hour rule before impulse buys!"};
+  if(avg<500) return {type:"Smart Saver",icon:"🧠",color:"#10b981",tip:"Amazing! Keep building your savings streak."};
+  return {type:"Balanced Planner",icon:"⚖️",color:"#3b82f6",tip:"You're doing well. Small optimizations can help!"};
+}
+
+/* ─── MAIN APP ─── */
+function App(){
+  const [theme,setTheme] = useState(ls('theme','dark'));
+  const [currency,setCurrency] = useState(ls('currency','₹'));
+  const [authMode,setAuthMode] = useState('login'); // login|signup
+  const [loginAs,setLoginAs] = useState('user'); // user|admin
+  const [user,setUser] = useState(ls('currentUser',null));
+  const [uname,setUname] = useState('');
+  const [upass,setUpass] = useState('');
+  const [authErr,setAuthErr] = useState('');
+  const [page,setPage] = useState('dashboard');
+  const [toast,setToast] = useState(null);
+
+  useEffect(()=>{
+    document.body.className = theme==='light'?'light-mode':'';
+  },[theme]);
+
+  const showToast = useCallback((msg,type='info')=>{
+    setToast({msg,type});
+    setTimeout(()=>setToast(null),3000);
+  },[]);
+
+  /* ── AUTH ── */
+  const doLogin = async () => {
+  setAuthErr("");
+
+  try {
+    const res = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: uname,
+        password: upass
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setAuthErr(data.msg);
+      return;
+    }
+
+    // Save user id
+    localStorage.setItem("userId", data.user._id);
+
+    // Login success
+    setUser({
+      id: data.user._id,
+      name: data.user.username
+    });
+
+  } catch (err) {
+    setAuthErr("Server error");
+  }
+};            
+  const doSignup = async () => {
+  setAuthErr("");
+
+  try {
+    const res = await fetch("http://localhost:5000/api/auth/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: uname,
+        password: upass
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setAuthErr(data.msg);
+      return;
+    }
+
+    alert("Account created! Please login");
+    setAuthMode("login");
+
+  } catch {
+    setAuthErr("Server error");
+  }
+};
+  const doLogout = ()=>{setUser(null);lss('currentUser',null);setPage('dashboard');};
+
+  /* ── USER DATA ── */
+  const getUserData = ()=>{
+    if(!user||user.role==='admin') return null;
+    const users = ls('users',{});
+    return users[user.id]||{expenses:[],groups:[],xp:0,level:1,streak:0,lastActive:today(),badges:[]};
+  };
+  const setUserData = (data)=>{
+    const users = ls('users',{});
+    users[user.id]=data;
+    lss('users',users);
+  };
+
+  if(!user) return <AuthScreen loginAs={loginAs} setLoginAs={setLoginAs} authMode={authMode} setAuthMode={setAuthMode}
+    uname={uname} setUname={setUname} upass={upass} setUpass={setUpass} authErr={authErr}
+    doLogin={doLogin} doSignup={doSignup} theme={theme} setTheme={setTheme}/>;
+
+  if(user.role==='admin') return <AdminPanel doLogout={doLogout} theme={theme} setTheme={setTheme} currency={currency} setCurrency={setCurrency}/>;
+
+  const ud = getUserData();
+  const sharedProps = {user,ud,setUserData,getUserData,showToast,currency,setCurrency,theme,setTheme,doLogout};
+
+  return (
+    <div style={{maxWidth:480,margin:'0 auto',position:'relative',minHeight:'100vh',paddingBottom:80}}>
+      {page==='dashboard'&&<Dashboard {...sharedProps}/>}
+      {page==='analytics'&&<Analytics {...sharedProps}/>}
+      {page==='futureflow'&&<FutureFlow {...sharedProps}/>}
+      {page==='profile'&&<Profile {...sharedProps}/>}
+      <BottomNav page={page} setPage={setPage}/>
+      {toast&&<div className={`toast ${toast.type==='success'?'bg-emerald-500':toast.type==='warn'?'bg-amber-500 text-black':'bg-indigo-600'}`}>{toast.msg}</div>}
+    </div>
+  );
+}
+
+/* ─── AUTH SCREEN ─── */
+function AuthScreen({loginAs,setLoginAs,authMode,setAuthMode,uname,setUname,upass,setUpass,authErr,doLogin,doSignup,theme,setTheme}){
+  return(
+    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:20,background:'var(--bg)'}}>
+      {/* BG orbs */}
+      <div style={{position:'fixed',top:-100,right:-100,width:400,height:400,borderRadius:'50%',background:'radial-gradient(circle,rgba(99,102,241,0.15),transparent 70%)',pointerEvents:'none'}}/>
+      <div style={{position:'fixed',bottom:-100,left:-100,width:300,height:300,borderRadius:'50%',background:'radial-gradient(circle,rgba(16,185,129,0.1),transparent 70%)',pointerEvents:'none'}}/>
+
+      <div className="fade-in" style={{width:'100%',maxWidth:380}}>
+        {/* Logo */}
+        <div style={{textAlign:'center',marginBottom:32}}>
+          <div style={{fontSize:48,marginBottom:8}}>💳</div>
+          <h1 className="font-display" style={{fontSize:28,fontWeight:800,background:'linear-gradient(135deg,#6366f1,#10b981)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>SmartBudget PRO</h1>
+          <p style={{color:'var(--text2)',fontSize:13,marginTop:4}}>Your AI-powered financial companion</p>
+        </div>
+
+        {/* Toggle Admin/User */}
+        <div style={{display:'flex',background:'var(--bg3)',borderRadius:12,padding:4,marginBottom:20}}>
+          {['user','admin'].map(t=>(
+            <button key={t} onClick={()=>setLoginAs(t)}
+              style={{flex:1,padding:'8px 0',borderRadius:9,fontSize:13,fontWeight:600,cursor:'pointer',border:'none',
+                background:loginAs===t?'var(--accent2)':'transparent',color:loginAs===t?'white':'var(--text2)',transition:'all 0.2s'}}>
+              {t==='user'?'👤 User':'🛡️ Admin'}
+            </button>
+          ))}
+        </div>
+
+        {/* Card */}
+        <div className="card" style={{padding:24}}>
+          {loginAs==='user'&&(
+            <div style={{display:'flex',background:'var(--bg3)',borderRadius:10,padding:3,marginBottom:16}}>
+              {['login','signup'].map(m=>(
+                <button key={m} onClick={()=>setAuthMode(m)}
+                  style={{flex:1,padding:'7px 0',borderRadius:8,fontSize:12,fontWeight:600,cursor:'pointer',border:'none',
+                    background:authMode===m?'var(--accent2)':'transparent',color:authMode===m?'white':'var(--text2)',transition:'all 0.2s'}}>
+                  {m==='login'?'Login':'Sign Up'}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <input placeholder={loginAs==='admin'?"Admin username":"Username"} value={uname}
+            onChange={e=>setUname(e.target.value)} style={{width:'100%',marginBottom:10}}/>
+          <input type="password" placeholder="Password" value={upass}
+            onChange={e=>setUpass(e.target.value)} style={{width:'100%',marginBottom:16}}
+            onKeyDown={e=>e.key==='Enter'&&(authMode==='login'?doLogin():doSignup())}/>
+
+          {authErr&&<p style={{color:'#ef4444',fontSize:12,marginBottom:12,textAlign:'center'}}>{authErr}</p>}
+
+          <button onClick={authMode==='login'?doLogin:doSignup} className="glow-btn"
+            style={{width:'100%',padding:'12px 0',borderRadius:12,border:'none',color:'white',fontSize:15,fontWeight:700,cursor:'pointer'}}>
+            {loginAs==='admin'?'Enter Admin Panel':authMode==='login'?'Login →':'Create Account →'}
+          </button>
+        </div>
+
+        <p style={{textAlign:'center',marginTop:16,color:'var(--text2)',fontSize:11}}>
+          Demo: admin / admin123 or create any user account
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── BOTTOM NAV ─── */
+function BottomNav({page,setPage}){
+  const items=[
+    {id:'dashboard',icon:'🏠',label:'Home'},
+    {id:'analytics',icon:'📊',label:'Analytics'},
+    {id:'futureflow',icon:'🔮',label:'FutureFlow'},
+    {id:'profile',icon:'👤',label:'Profile'},
+  ];
+  return(
+    <div style={{position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:480,
+      background:'var(--card)',borderTop:'1px solid var(--border)',display:'flex',padding:'8px 4px',zIndex:100}}>
+      {items.map(i=>(
+        <div key={i.id} className={`nav-item ${page===i.id?'active':''}`} onClick={()=>setPage(i.id)}>
+          <span style={{fontSize:20}}>{i.icon}</span>
+          <span>{i.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ─── DASHBOARD ─── */
+function Dashboard({user,ud,setUserData,showToast,currency,setCurrency,theme,setTheme,doLogout}){
+  const [amount,setAmount] = useState('');
+  const [category,setCategory] = useState('Food');
+  const loadExpenses = async () => {
+  const userId = localStorage.getItem("userId");
+
+  const res = await fetch(`http://localhost:5000/api/expenses/${userId}`);
+  const data = await res.json();
+
+  setUserData({
+    ...ud,
+    expenses: data
+  });
+};
+  const [note,setNote] = useState('');
+  const [budget] = useState(10000);
+  const [smsText,setSmsText] = useState('');
+  const [showSMS,setShowSMS] = useState(false);
+  const [showReceipt,setShowReceipt] = useState(false);
+  const [searchQ,setSearchQ] = useState('');
+  const [filterCat,setFilterCat] = useState('All');
+  const [dateFilter,setDateFilter] = useState('all');
+  const chartRef = useRef(null);
+  const chartInstance = useRef(null);
+
+  const expenses = ud?.expenses||[];
+  const personality = detectPersonality(expenses);
+
+  const filteredExp = expenses.filter(e=>{
+    if(filterCat!=='All'&&e.category!==filterCat) return false;
+    if(searchQ&&!e.category.toLowerCase().includes(searchQ.toLowerCase())&&!(e.note||'').toLowerCase().includes(searchQ.toLowerCase())) return false;
+    if(dateFilter==='today'&&e.date!==today()) return false;
+    if(dateFilter==='week'&&e.date<daysAgo(7)) return false;
+    if(dateFilter==='month'&&e.date<daysAgo(30)) return false;
+    return true;
+  }).slice().reverse();
+
+  const total = expenses.reduce((s,e)=>s+e.amount,0);
+  const todayTotal = expenses.filter(e=>e.date===today()).reduce((s,e)=>s+e.amount,0);
+  const pct = Math.min((total/budget)*100,100);
+
+  /* budget nudge */
+  const checkNudge = (newTotal)=>{
+    if(newTotal>budget) showToast('🚨 Budget exceeded! Time to pause spending.','warn');
+    else if(newTotal>budget*0.8) showToast('⚠️ At 80% of budget. Slow down!','warn');
+    else if(newTotal>budget*0.5) showToast('📊 Halfway through budget.','info');
+  };
+
+ const addExpense = async () => {
+  if (!amount) return;
+
+  const userId = localStorage.getItem("userId");
+
+  await fetch("http://localhost:5000/api/expenses/add", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      userId,
+      amount,
+      category,
+      note
+    })
+  });
+  
+  alert("Expense added!");
+};
+  const deleteExpense = (id)=>{
+    setUserData({...ud,expenses:expenses.filter(e=>e.id!==id)});
+  };
+
+  const parseSMSInput = ()=>{
+    const {amt,cat}=parseSMS(smsText);
+    if(amt){setAmount(String(amt));setCategory(cat);setShowSMS(false);setSmsText('');showToast('✅ SMS parsed successfully!','success');}
+    else showToast('Could not parse amount from SMS','warn');
+  };
+
+  const mockReceiptScan = (e)=>{
+    const file=e.target.files[0];
+    if(!file) return;
+    showToast('🤖 AI scanning receipt...','info');
+    setTimeout(()=>{
+      const mockAmts=[450,1200,89,350,2500,670];
+      const mockCats=['Food','Shopping','Health','Entertainment','Bills','Travel'];
+      const idx=Math.floor(Math.random()*mockAmts.length);
+      setAmount(String(mockAmts[idx]));setCategory(mockCats[idx]);setShowReceipt(false);
+      showToast(`✅ Receipt scanned: ${currency}${mockAmts[idx]} - ${mockCats[idx]}`,'success');
+    },1800);
+  };
+
+  const startVoice = ()=>{
+    const R=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!R){showToast('Voice not supported in this browser','warn');return;}
+    const r=new R();
+    r.onresult=(e)=>{
+      const t=e.results[0][0].transcript;
+      const nums=t.match(/\d+/);
+      if(nums) setAmount(nums[0]);
+      const low=t.toLowerCase();
+      for(const c of CATEGORIES){if(low.includes(c.toLowerCase())){setCategory(c);break;}}
+      showToast('🎤 Voice captured!','success');
+    };
+    r.start();
+  };
+
+  const exportPDF=()=>{
+    const {jsPDF}=window.jspdf;const doc=new jsPDF();
+    doc.setFontSize(18);doc.text("SmartBudget PRO - Expense Report",14,20);
+    doc.setFontSize(11);doc.text(`User: ${user.name}  |  Total: ${currency}${total}`,14,32);
+    doc.setFontSize(10);
+    expenses.slice(-30).forEach((e,i)=>{doc.text(`${e.date}  ${CAT_ICONS[e.category]||''} ${e.category}: ${currency}${e.amount} ${e.note?'- '+e.note:''}`,14,44+i*8);});
+    doc.save("SmartBudget_Report.pdf");showToast('📄 PDF exported!','success');
+  };
+  const exportExcel=()=>{
+    const ws=XLSX.utils.json_to_sheet(expenses.map(e=>({Date:e.date,Category:e.category,Amount:e.amount,Note:e.note||''})));
+    const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Expenses");
+    XLSX.writeFile(wb,"SmartBudget_Report.xlsx");showToast('📊 Excel exported!','success');
+  };
+
+  // chart
+  // 1. Load data only once
+useEffect(() => {
+  loadExpenses();
+}, []);
+
+// 2. Handle chart when expenses change
+useEffect(() => {
+  if (!expenses.length || !chartRef.current) return;
+
+  const map = {};
+  expenses.forEach(e => {
+    map[e.category] = (map[e.category] || 0) + e.amount;
+  });
+
+  if (chartInstance.current) chartInstance.current.destroy();
+
+  chartInstance.current = new Chart(chartRef.current, {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(map),
+      datasets: [{
+        data: Object.values(map),
+        backgroundColor: Object.keys(map).map(
+          k => CAT_COLORS[k] || '#94a3b8'
+        ),
+        borderWidth: 0,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      cutout: '72%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: 'var(--text)',
+            font: { size: 11 },
+            padding: 8
+          }
+        }
+      }
+    }
+  });
+
+  return () => {
+    if (chartInstance.current) chartInstance.current.destroy();
+  };
+}, [expenses]);
+
+  const xpPct = ((ud?.xp||0)%XP_PER_LEVEL)/XP_PER_LEVEL*100;
+
+  return(
+    <div className="fade-in" style={{padding:'16px 16px 0'}}>
+      {/* Header */}
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+        <div>
+          <p style={{color:'var(--text2)',fontSize:12}}>Welcome back 👋</p>
+          <h2 className="font-display" style={{fontSize:20,fontWeight:800}}>{user.name}</h2>
+        </div>
+        <div style={{display:'flex',gap:8,alignItems:'center'}}>
+          <button onClick={()=>setTheme(t=>t==='dark'?'light':'dark')}
+            style={{background:'var(--bg3)',border:'1px solid var(--border)',borderRadius:8,padding:'6px 10px',cursor:'pointer',fontSize:14}}>
+            {theme==='dark'?'☀️':'🌙'}
+          </button>
+          <button onClick={()=>setCurrency(c=>c==='₹'?'$':'₹')}
+            style={{background:'var(--bg3)',border:'1px solid var(--border)',borderRadius:8,padding:'6px 10px',cursor:'pointer',fontSize:13,fontWeight:700,color:'var(--text)'}}>
+            {currency==='₹'?'₹→$':'$→₹'}
+          </button>
+          <div style={{width:36,height:36,borderRadius:'50%',background:'linear-gradient(135deg,var(--accent2),var(--accent))',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,cursor:'pointer'}} onClick={doLogout} title="Logout">👋</div>
+        </div>
+      </div>
+
+      {/* Hero Balance Card */}
+      <div className="hero-gradient fade-in" style={{borderRadius:20,padding:24,marginBottom:16,position:'relative'}}>
+        <div style={{position:'relative',zIndex:1}}>
+          <p style={{color:'rgba(255,255,255,0.7)',fontSize:12,marginBottom:4}}>Total Spent</p>
+          <h1 className="font-display" style={{fontSize:38,fontWeight:800,color:'white'}}>{fmtMoney(total,currency)}</h1>
+          <p style={{color:'rgba(255,255,255,0.6)',fontSize:12,marginTop:2}}>Budget: {fmtMoney(budget,currency)} · Today: {fmtMoney(todayTotal,currency)}</p>
+          <div style={{marginTop:12}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+              <span style={{color:'rgba(255,255,255,0.6)',fontSize:11}}>Budget used</span>
+              <span style={{color:'white',fontSize:11,fontWeight:600}}>{pct.toFixed(0)}%</span>
+            </div>
+            <div className="progress-bar"><div className="progress-fill" style={{width:`${pct}%`,background:pct>80?'#ef4444':pct>50?'#f59e0b':'#10b981'}}/></div>
+          </div>
+          {/* XP bar */}
+          <div style={{marginTop:10,display:'flex',alignItems:'center',gap:8}}>
+            <span style={{color:'rgba(255,255,255,0.7)',fontSize:10}}>Lv.{ud?.level||1}</span>
+            <div style={{flex:1,height:4,borderRadius:99,background:'rgba(255,255,255,0.2)'}}>
+              <div style={{width:`${xpPct}%`,height:'100%',borderRadius:99,background:'#10b981',transition:'width 1s'}}/>
+            </div>
+            <span style={{color:'rgba(255,255,255,0.7)',fontSize:10}}>{ud?.xp||0} XP</span>
+          </div>
+        </div>
+        {/* Streak */}
+        {(ud?.streak||0)>0&&(
+          <div style={{position:'absolute',top:16,right:16,background:'rgba(255,255,255,0.15)',borderRadius:10,padding:'6px 10px',display:'flex',alignItems:'center',gap:4}}>
+            <span className="streak-fire" style={{fontSize:16}}>🔥</span>
+            <span style={{color:'white',fontWeight:700,fontSize:13}}>{ud.streak}d</span>
+          </div>
+        )}
+      </div>
+
+      {/* Personality Card */}
+      <div className="card fade-in" style={{padding:14,marginBottom:16,display:'flex',alignItems:'center',gap:12}}>
+        <div style={{width:44,height:44,borderRadius:12,background:`${personality.color}22`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22}}>{personality.icon}</div>
+        <div style={{flex:1}}>
+          <p style={{fontSize:11,color:'var(--text2)'}}>Spending Personality</p>
+          <p style={{fontWeight:700,fontSize:14,color:personality.color}}>{personality.type}</p>
+          <p style={{fontSize:11,color:'var(--text2)',marginTop:1}}>{personality.tip}</p>
+        </div>
+      </div>
+
+      {/* Add Expense */}
+      <div className="card" style={{padding:16,marginBottom:16}}>
+        <h3 className="font-display" style={{fontSize:14,fontWeight:700,marginBottom:12}}>Add Expense</h3>
+        <input placeholder="Amount" value={amount} onChange={e=>setAmount(e.target.value)} type="number"
+          style={{width:'100%',marginBottom:8}}/>
+        <input placeholder="Note (optional)" value={note} onChange={e=>setNote(e.target.value)}
+          style={{width:'100%',marginBottom:8}}/>
+        <select value={category} onChange={e=>setCategory(e.target.value)} style={{width:'100%',marginBottom:12}}>
+          {CATEGORIES.map(c=><option key={c}>{CAT_ICONS[c]} {c}</option>)}
+        </select>
+        <div style={{display:'flex',gap:8,marginBottom:10}}>
+          <button onClick={startVoice} style={{background:'var(--bg3)',border:'1px solid var(--border)',borderRadius:10,padding:'10px 14px',cursor:'pointer',fontSize:16}}>🎤</button>
+          <button onClick={()=>setShowSMS(!showSMS)} style={{background:'var(--bg3)',border:'1px solid var(--border)',borderRadius:10,padding:'10px 14px',cursor:'pointer',fontSize:16}}>💬</button>
+          <button onClick={()=>setShowReceipt(!showReceipt)} style={{background:'var(--bg3)',border:'1px solid var(--border)',borderRadius:10,padding:'10px 14px',cursor:'pointer',fontSize:16}}>📷</button>
+          <button onClick={addExpense} className="glow-btn" style={{flex:1,borderRadius:10,border:'none',color:'white',fontSize:14,fontWeight:700,cursor:'pointer',padding:'10px 0'}}>
+            + Add Expense
+          </button>
+        </div>
+        {showSMS&&(
+          <div style={{marginTop:4,animation:'fadeIn 0.3s ease'}}>
+            <textarea placeholder="Paste bank SMS here e.g. ₹500 spent at Swiggy" value={smsText} onChange={e=>setSmsText(e.target.value)}
+              style={{width:'100%',height:70,resize:'none',background:'var(--bg3)',color:'var(--text)',border:'1px solid var(--border)',borderRadius:10,padding:10,fontSize:13,fontFamily:'DM Sans',marginBottom:6}}/>
+            <button onClick={parseSMSInput} style={{background:'#f59e0b',border:'none',borderRadius:8,padding:'8px 16px',color:'#000',fontWeight:700,cursor:'pointer',fontSize:13}}>
+              Parse SMS 🔍
+            </button>
+          </div>
+        )}
+        {showReceipt&&(
+          <div style={{marginTop:4,textAlign:'center',padding:12,border:'2px dashed var(--border)',borderRadius:10}}>
+            <p style={{color:'var(--text2)',fontSize:12,marginBottom:8}}>📷 Upload receipt for AI extraction</p>
+            <input type="file" accept="image/*" onChange={mockReceiptScan} style={{fontSize:12}}/>
+          </div>
+        )}
+      </div>
+
+      {/* Chart */}
+      {expenses.length>0&&(
+        <div className="card" style={{padding:16,marginBottom:16}}>
+          <h3 className="font-display" style={{fontSize:14,fontWeight:700,marginBottom:12}}>Spending Breakdown</h3>
+          <canvas ref={chartRef} style={{maxHeight:220}}/>
+        </div>
+      )}
+
+      {/* Expense List */}
+      <div className="card" style={{padding:16,marginBottom:16}}>
+        <h3 className="font-display" style={{fontSize:14,fontWeight:700,marginBottom:12}}>Transactions</h3>
+        <input placeholder="🔍 Search expenses..." value={searchQ} onChange={e=>setSearchQ(e.target.value)} style={{width:'100%',marginBottom:8}}/>
+        <div style={{display:'flex',gap:6,marginBottom:10,overflowX:'auto',paddingBottom:4}}>
+          {['all','today','week','month'].map(f=>(
+            <button key={f} onClick={()=>setDateFilter(f)}
+              style={{padding:'5px 12px',borderRadius:20,border:'1px solid var(--border)',background:dateFilter===f?'var(--accent2)':'var(--bg3)',
+                color:dateFilter===f?'white':'var(--text2)',fontSize:11,cursor:'pointer',whiteSpace:'nowrap',fontWeight:600}}>
+              {f==='all'?'All':f==='today'?'Today':f==='week'?'This Week':'This Month'}
+            </button>
+          ))}
+        </div>
+        <div style={{display:'flex',gap:6,marginBottom:10,overflowX:'auto',paddingBottom:4}}>
+          {['All',...CATEGORIES].map(c=>(
+            <button key={c} onClick={()=>setFilterCat(c)}
+              style={{padding:'5px 10px',borderRadius:20,border:'1px solid var(--border)',
+                background:filterCat===c?CAT_COLORS[c]||'var(--accent2)':'var(--bg3)',
+                color:filterCat===c?'white':'var(--text2)',fontSize:11,cursor:'pointer',whiteSpace:'nowrap',fontWeight:600}}>
+              {c!=='All'?CAT_ICONS[c]:''} {c}
+            </button>
+          ))}
+        </div>
+        {filteredExp.length===0&&<p style={{color:'var(--text2)',fontSize:13,textAlign:'center',padding:16}}>No expenses found</p>}
+        {filteredExp.map((e,i)=>(
+          <div key={e.id||i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid var(--border)'}}>
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <div style={{width:36,height:36,borderRadius:10,background:`${CAT_COLORS[e.category]||'#94a3b8'}22`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:16}}>
+                {CAT_ICONS[e.category]||'💼'}
+              </div>
+              <div>
+                <p style={{fontWeight:600,fontSize:13}}>{e.category}</p>
+                <p style={{color:'var(--text2)',fontSize:11}}>{e.date}{e.note?` · ${e.note}`:''}</p>
+              </div>
+            </div>
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              <span style={{fontWeight:700,color:CAT_COLORS[e.category]||'var(--text)',fontSize:14}}>{fmtMoney(e.amount,currency)}</span>
+              <button onClick={()=>deleteExpense(e.id)} style={{background:'none',border:'none',cursor:'pointer',color:'var(--text2)',fontSize:14}}>×</button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Export */}
+      <div style={{display:'flex',gap:8,marginBottom:8}}>
+        <button onClick={exportPDF} style={{flex:1,background:'#ef4444',border:'none',borderRadius:12,padding:'12px 0',color:'white',fontWeight:700,cursor:'pointer',fontSize:13}}>📄 Export PDF</button>
+        <button onClick={exportExcel} style={{flex:1,background:'#10b981',border:'none',borderRadius:12,padding:'12px 0',color:'white',fontWeight:700,cursor:'pointer',fontSize:13}}>📊 Export Excel</button>
+      </div>
+
+      {/* Group Budgeting */}
+      <GroupSection ud={ud} setUserData={setUserData} currency={currency} showToast={showToast}/>
+    </div>
+  );
+}
+
+/* ─── GROUP BUDGETING ─── */
+function GroupSection({ud,setUserData,currency,showToast}){
+  const [showCreate,setShowCreate] = useState(false);
+  const [grpName,setGrpName] = useState('');
+  const [members,setMembers] = useState('');
+  const [selGroup,setSelGroup] = useState(null);
+  const [expAmt,setExpAmt] = useState('');
+  const [expDesc,setExpDesc] = useState('');
+  const [expPayer,setExpPayer] = useState('');
+
+  const groups = ud?.groups||[];
+
+  const createGroup = ()=>{
+    if(!grpName||!members) return;
+    const mList=members.split(',').map(m=>m.trim()).filter(Boolean);
+    const g={id:randId(),name:grpName,members:mList,expenses:[]};
+    setUserData({...ud,groups:[...groups,g]});
+    setGrpName('');setMembers('');setShowCreate(false);
+    showToast('👥 Group created!','success');
+  };
+
+  const addGroupExpense = (gid)=>{
+    if(!expAmt||!expPayer) return;
+    const updated=groups.map(g=>{
+      if(g.id!==gid) return g;
+      return {...g,expenses:[...g.expenses,{id:randId(),amount:Number(expAmt),desc:expDesc,payer:expPayer,date:today()}]};
+    });
+    setUserData({...ud,groups:updated});setExpAmt('');setExpDesc('');setExpPayer('');
+    showToast('✅ Expense added to group','success');
+  };
+
+  const calcSplits = (g)=>{
+    const perHead = g.expenses.reduce((s,e)=>s+e.amount,0)/g.members.length;
+    const paid = {};
+    g.members.forEach(m=>paid[m]=0);
+    g.expenses.forEach(e=>paid[e.payer]=(paid[e.payer]||0)+e.amount);
+    return g.members.map(m=>({name:m,balance:(paid[m]||0)-perHead}));
+  };
+
+  return(
+    <div className="card" style={{padding:16,marginBottom:16}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+        <h3 className="font-display" style={{fontSize:14,fontWeight:700}}>👥 Group Budgeting</h3>
+        <button onClick={()=>setShowCreate(!showCreate)} className="glow-btn"
+          style={{border:'none',borderRadius:8,padding:'6px 12px',color:'white',fontSize:12,fontWeight:600,cursor:'pointer'}}>
+          + Create
+        </button>
+      </div>
+      {showCreate&&(
+        <div style={{marginBottom:12,padding:12,background:'var(--bg3)',borderRadius:10}}>
+          <input placeholder="Group name (e.g. Goa Trip)" value={grpName} onChange={e=>setGrpName(e.target.value)} style={{width:'100%',marginBottom:8}}/>
+          <input placeholder="Members (comma separated)" value={members} onChange={e=>setMembers(e.target.value)} style={{width:'100%',marginBottom:8}}/>
+          <button onClick={createGroup} style={{background:'var(--accent2)',border:'none',borderRadius:8,padding:'8px 16px',color:'white',fontWeight:600,cursor:'pointer',fontSize:13}}>Create Group</button>
+        </div>
+      )}
+      {groups.length===0&&<p style={{color:'var(--text2)',fontSize:12,textAlign:'center',padding:8}}>No groups yet. Split expenses with friends!</p>}
+      {groups.map(g=>(
+        <div key={g.id} style={{marginBottom:10,padding:12,background:'var(--bg3)',borderRadius:10}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+            <div>
+              <p style={{fontWeight:700,fontSize:13}}>{g.name}</p>
+              <p style={{color:'var(--text2)',fontSize:11}}>{g.members.join(', ')}</p>
+            </div>
+            <button onClick={()=>setSelGroup(selGroup===g.id?null:g.id)}
+              style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:8,padding:'4px 10px',color:'var(--text)',cursor:'pointer',fontSize:11}}>
+              {selGroup===g.id?'Close':'View'}
+            </button>
+          </div>
+          {selGroup===g.id&&(
+            <div>
+              <div style={{display:'flex',gap:6,marginBottom:8}}>
+                <input placeholder="Amount" value={expAmt} onChange={e=>setExpAmt(e.target.value)} type="number" style={{flex:1}}/>
+                <input placeholder="Paid by" value={expPayer} onChange={e=>setExpPayer(e.target.value)} list={`members-${g.id}`} style={{flex:1}}/>
+                <datalist id={`members-${g.id}`}>{g.members.map(m=><option key={m} value={m}/>)}</datalist>
+              </div>
+              <input placeholder="Description" value={expDesc} onChange={e=>setExpDesc(e.target.value)} style={{width:'100%',marginBottom:8}}/>
+              <button onClick={()=>addGroupExpense(g.id)}
+                style={{background:'var(--accent)',border:'none',borderRadius:8,padding:'7px 14px',color:'white',fontWeight:600,cursor:'pointer',fontSize:12,marginBottom:10}}>
+                Add Expense
+              </button>
+              {g.expenses.length>0&&(
+                <div>
+                  <p style={{fontSize:11,fontWeight:700,color:'var(--text2)',marginBottom:6}}>BALANCES</p>
+                  {calcSplits(g).map(s=>(
+                    <div key={s.name} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',fontSize:12}}>
+                      <span>{s.name}</span>
+                      <span style={{color:s.balance>=0?'#10b981':'#ef4444',fontWeight:700}}>
+                        {s.balance>=0?'gets back ':'owes '}{fmtMoney(Math.abs(s.balance),currency)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ─── ANALYTICS PAGE ─── */
+function Analytics({ud,currency}){
+  const expenses = ud?.expenses||[];
+  const chartRef = useRef(null);
+  const barRef = useRef(null);
+  const chartInst = useRef(null);
+  const barInst = useRef(null);
+
+  // weekly data
+  const weekData = Array.from({length:7},(_,i)=>{
+    const d = daysAgo(6-i);
+    return {day:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(d).getDay()],
+      total:expenses.filter(e=>e.date===d).reduce((s,e)=>s+e.amount,0)};
+  });
+
+  const catTotals = {};
+  expenses.forEach(e=>catTotals[e.category]=(catTotals[e.category]||0)+e.amount);
+  const sortedCats = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
+  const total = expenses.reduce((s,e)=>s+e.amount,0);
+
+  // subscription detection
+  const subs = expenses.filter(e=>e.category==='Subscriptions');
+  const uniqueSubs = [...new Set(subs.map(e=>e.note||'Subscription'))];
+
+  useEffect(()=>{
+    if(!chartRef.current) return;
+    if(chartInst.current) chartInst.current.destroy();
+    chartInst.current=new Chart(chartRef.current,{
+      type:'line',
+      data:{
+        labels:weekData.map(d=>d.day),
+        datasets:[{label:'Daily Spend',data:weekData.map(d=>d.total),borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,0.1)',fill:true,tension:0.4,pointBackgroundColor:'#6366f1',pointRadius:4}]
+      },
+      options:{responsive:true,plugins:{legend:{labels:{color:'var(--text)',font:{size:11}}}},scales:{x:{ticks:{color:'var(--text2)'}},y:{ticks:{color:'var(--text2)'}}}}
+    });
+    return()=>{if(chartInst.current) chartInst.current.destroy();};
+  },[expenses]);
+
+  useEffect(()=>{
+    if(!barRef.current||!sortedCats.length) return;
+    if(barInst.current) barInst.current.destroy();
+    barInst.current=new Chart(barRef.current,{
+      type:'bar',
+      data:{
+        labels:sortedCats.map(c=>c[0]),
+        datasets:[{label:'Amount',data:sortedCats.map(c=>c[1]),backgroundColor:sortedCats.map(c=>CAT_COLORS[c[0]]||'#6366f1'),borderRadius:6,borderWidth:0}]
+      },
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'var(--text2)'}},y:{ticks:{color:'var(--text2)'}}}}
+    });
+    return()=>{if(barInst.current) barInst.current.destroy();};
+  },[expenses]);
+
+  return(
+    <div className="fade-in" style={{padding:16}}>
+      <h2 className="font-display" style={{fontSize:20,fontWeight:800,marginBottom:16}}>📊 Analytics</h2>
+
+      {/* Stats cards */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:16}}>
+        {[
+          {label:'Total Spent',val:fmtMoney(total,currency),icon:'💸',color:'#6366f1'},
+          {label:'Transactions',val:expenses.length,icon:'🔢',color:'#10b981'},
+          {label:'Avg per day',val:fmtMoney(total/Math.max(1,[...new Set(expenses.map(e=>e.date))].length),currency),icon:'📅',color:'#f59e0b'},
+          {label:'Top Category',val:sortedCats[0]?.[0]||'—',icon:CAT_ICONS[sortedCats[0]?.[0]]||'💼',color:'#ef4444'},
+        ].map((s,i)=>(
+          <div key={i} className="card" style={{padding:14}}>
+            <div style={{fontSize:20,marginBottom:4}}>{s.icon}</div>
+            <p style={{color:'var(--text2)',fontSize:11}}>{s.label}</p>
+            <p style={{fontWeight:800,fontSize:16,color:s.color}}>{s.val}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Weekly chart */}
+      <div className="card" style={{padding:16,marginBottom:16}}>
+        <h3 className="font-display" style={{fontSize:13,fontWeight:700,marginBottom:12}}>📈 Weekly Spending</h3>
+        <canvas ref={chartRef} style={{maxHeight:180}}/>
+      </div>
+
+      {/* Category bar */}
+      {sortedCats.length>0&&(
+        <div className="card" style={{padding:16,marginBottom:16}}>
+          <h3 className="font-display" style={{fontSize:13,fontWeight:700,marginBottom:12}}>📦 Category Breakdown</h3>
+          <canvas ref={barRef} style={{maxHeight:180}}/>
+        </div>
+      )}
+
+      {/* Category list */}
+      <div className="card" style={{padding:16,marginBottom:16}}>
+        <h3 className="font-display" style={{fontSize:13,fontWeight:700,marginBottom:12}}>Category Summary</h3>
+        {sortedCats.map(([cat,amt])=>(
+          <div key={cat} style={{marginBottom:10}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+              <span style={{fontSize:13}}>{CAT_ICONS[cat]} {cat}</span>
+              <span style={{fontSize:13,fontWeight:700,color:CAT_COLORS[cat]}}>{fmtMoney(amt,currency)} · {total?((amt/total)*100).toFixed(0):0}%</span>
+            </div>
+            <div className="progress-bar"><div className="progress-fill" style={{width:`${total?(amt/total)*100:0}%`,background:CAT_COLORS[cat]||'var(--accent)'}}/></div>
+          </div>
+        ))}
+        {sortedCats.length===0&&<p style={{color:'var(--text2)',fontSize:13,textAlign:'center',padding:12}}>No data yet. Add some expenses!</p>}
+      </div>
+
+      {/* Subscription Tracker */}
+      <div className="card" style={{padding:16,marginBottom:16}}>
+        <h3 className="font-display" style={{fontSize:13,fontWeight:700,marginBottom:12}}>📱 Subscription Tracker</h3>
+        {subs.length===0&&<p style={{color:'var(--text2)',fontSize:12}}>No subscriptions detected. Add expenses under 'Subscriptions' category.</p>}
+        {[
+          {name:'Netflix',icon:'🎬',color:'#ef4444',amt:649},
+          {name:'Spotify',icon:'🎵',color:'#1db954',amt:119},
+          {name:'Amazon Prime',icon:'📦',color:'#f59e0b',amt:299},
+        ].map((s,i)=>(
+          <div key={i} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 0',borderBottom:'1px solid var(--border)'}}>
+            <div style={{width:38,height:38,borderRadius:10,background:`${s.color}22`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>{s.icon}</div>
+            <div style={{flex:1}}>
+              <p style={{fontWeight:600,fontSize:13}}>{s.name}</p>
+              <p style={{color:'var(--text2)',fontSize:11}}>Renews monthly</p>
+            </div>
+            <div style={{textAlign:'right'}}>
+              <p style={{fontWeight:700,color:s.color,fontSize:13}}>{fmtMoney(s.amt,currency)}/mo</p>
+              <span style={{fontSize:10,background:'rgba(245,158,11,0.15)',color:'#f59e0b',padding:'2px 6px',borderRadius:6,fontWeight:600}}>Due soon</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── FUTUREFLOW PAGE ─── */
+function FutureFlow({ud,currency,showToast}){
+  const [tab,setTab] = useState('forecast');
+  const [days,setDays] = useState(30);
+  const [goalAmt,setGoalAmt] = useState('');
+  const [monthlySave,setMonthlySave] = useState('');
+  const [salaryChg,setSalaryChg] = useState(0);
+  const [rentChg,setRentChg] = useState(0);
+  const [expChg,setExpChg] = useState(0);
+  const [income,setIncome] = useState(50000);
+  const [forecasted,setForecasted] = useState(null);
+  const [goalResult,setGoalResult] = useState(null);
+  const [scenarioResult,setScenarioResult] = useState(null);
+  const chartRef = useRef(null);
+  const chartInst = useRef(null);
+
+  const expenses = ud?.expenses||[];
+  const avgDaily = expenses.length?expenses.reduce((s,e)=>s+e.amount,0)/Math.max(1,[...new Set(expenses.map(e=>e.date))].length):500;
+  const balance = income - expenses.filter(e=>e.date>=daysAgo(30)).reduce((s,e)=>s+e.amount,0);
+
+  const runForecast = ()=>{
+    const points=[];
+    let bal=balance;
+    for(let i=0;i<days;i++){
+      bal-=avgDaily;
+      points.push({day:i+1,balance:Math.round(bal)});
+    }
+    setForecasted(points);
+    const brokeDay=points.findIndex(p=>p.balance<0);
+    if(brokeDay>=0) showToast(`😅 You may run out in ~${brokeDay+1} days!`,'warn');
+    else showToast('✅ You look financially healthy!','success');
+  };
+
+  useEffect(()=>{
+    if(!forecasted||!chartRef.current) return;
+    if(chartInst.current) chartInst.current.destroy();
+    chartInst.current=new Chart(chartRef.current,{
+      type:'line',
+      data:{
+        labels:forecasted.map(p=>`Day ${p.day}`),
+        datasets:[{
+          label:'Predicted Balance',
+          data:forecasted.map(p=>p.balance),
+          borderColor:forecasted[forecasted.length-1].balance<0?'#ef4444':'#10b981',
+          backgroundColor:forecasted[forecasted.length-1].balance<0?'rgba(239,68,68,0.1)':'rgba(16,185,129,0.1)',
+          fill:true,tension:0.4,pointRadius:0
+        }]
+      },
+      options:{responsive:true,plugins:{legend:{labels:{color:'var(--text)'}},tooltip:{callbacks:{label:d=>`${currency}${d.raw.toLocaleString()}`}}},scales:{x:{ticks:{color:'var(--text2)',maxTicksLimit:6}},y:{ticks:{color:'var(--text2)'}}}}
+    });
+    return()=>{if(chartInst.current) chartInst.current.destroy();};
+  },[forecasted]);
+
+  const calcGoal = ()=>{
+    if(!goalAmt||!monthlySave) return;
+    const months=Math.ceil(Number(goalAmt)/Number(monthlySave));
+    const pct=Math.min((Number(monthlySave)*1/Number(goalAmt))*100,100);
+    setGoalResult({months,pct,tip:months>24?"Consider increasing savings or finding additional income sources.":months>12?"You're on track! Small daily savings can accelerate this.":"Great pace! You'll hit your goal soon."});
+  };
+
+  const calcScenario = ()=>{
+    const newIncome=income*(1+salaryChg/100);
+    const newRent=5000*(1+rentChg/100);
+    const newExpenses=avgDaily*30*(1+expChg/100);
+    const newBalance=newIncome-newRent-newExpenses;
+    const risk=newBalance<5000?'danger':newBalance<15000?'warn':'safe';
+    setScenarioResult({newBalance:Math.round(newBalance),risk,newIncome:Math.round(newIncome)});
+  };
+
+  return(
+    <div className="fade-in" style={{padding:16}}>
+      <div style={{marginBottom:16}}>
+        <h2 className="font-display" style={{fontSize:20,fontWeight:800}}>🔮 FutureFlow</h2>
+        <p style={{color:'var(--text2)',fontSize:12,marginTop:2}}>AI-powered financial predictions</p>
+      </div>
+
+      {/* Tabs */}
+      <div style={{display:'flex',gap:6,marginBottom:16,background:'var(--bg3)',padding:4,borderRadius:12}}>
+        {[['forecast','📈 Forecast'],['goal','🎯 Goal'],['scenario','⚙️ Scenario']].map(([t,l])=>(
+          <button key={t} className={`tab-btn ${tab===t?'active':''}`} onClick={()=>setTab(t)} style={{flex:1,fontSize:12}}>{l}</button>
+        ))}
+      </div>
+
+      {tab==='forecast'&&(
+        <div>
+          <div className="card" style={{padding:16,marginBottom:16}}>
+            <div style={{display:'flex',gap:8,marginBottom:12,alignItems:'center'}}>
+              <input placeholder="Monthly income" value={income} onChange={e=>setIncome(Number(e.target.value))} type="number" style={{flex:1}}/>
+            </div>
+            <div style={{display:'flex',gap:6,marginBottom:12}}>
+              {[30,60,90].map(d=>(
+                <button key={d} onClick={()=>setDays(d)}
+                  style={{flex:1,padding:'8px 0',borderRadius:10,border:'1px solid var(--border)',background:days===d?'var(--accent2)':'var(--bg3)',color:days===d?'white':'var(--text)',cursor:'pointer',fontWeight:700,fontSize:13}}>
+                  {d}d
+                </button>
+              ))}
+            </div>
+            <button onClick={runForecast} className="glow-btn" style={{width:'100%',border:'none',borderRadius:12,padding:'12px 0',color:'white',fontWeight:700,cursor:'pointer',fontSize:14}}>
+              Run Cash Flow Forecast 🔮
+            </button>
+          </div>
+
+          {forecasted&&(
+            <div className="card bounce-in" style={{padding:16,marginBottom:16}}>
+              <canvas ref={chartRef} style={{maxHeight:200,marginBottom:12}}/>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+                <div style={{padding:12,background:'var(--bg3)',borderRadius:10}}>
+                  <p style={{color:'var(--text2)',fontSize:11}}>Current Balance</p>
+                  <p style={{fontWeight:800,fontSize:16,color:'#10b981'}}>{fmtMoney(balance,currency)}</p>
+                </div>
+                <div style={{padding:12,background:'var(--bg3)',borderRadius:10}}>
+                  <p style={{color:'var(--text2)',fontSize:11}}>In {days} days</p>
+                  <p style={{fontWeight:800,fontSize:16,color:forecasted[forecasted.length-1].balance<0?'#ef4444':'#10b981'}}>
+                    {fmtMoney(forecasted[forecasted.length-1].balance,currency)}
+                  </p>
+                </div>
+                <div style={{padding:12,background:'var(--bg3)',borderRadius:10}}>
+                  <p style={{color:'var(--text2)',fontSize:11}}>Avg Daily Spend</p>
+                  <p style={{fontWeight:800,fontSize:16,color:'#f59e0b'}}>{fmtMoney(Math.round(avgDaily),currency)}</p>
+                </div>
+                <div style={{padding:12,background:'var(--bg3)',borderRadius:10}}>
+                  <p style={{color:'var(--text2)',fontSize:11}}>Broke in</p>
+                  <p style={{fontWeight:800,fontSize:16,color:'#ef4444'}}>
+                    {forecasted.findIndex(p=>p.balance<0)>=0?`~${forecasted.findIndex(p=>p.balance<0)+1} days`:'Not soon 🎉'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab==='goal'&&(
+        <div>
+          <div className="card" style={{padding:16,marginBottom:16}}>
+            <h3 className="font-display" style={{fontSize:14,fontWeight:700,marginBottom:12}}>🎯 Goal Simulator</h3>
+            <input placeholder={`Goal amount (e.g. ${currency}100000)`} value={goalAmt} onChange={e=>setGoalAmt(e.target.value)} type="number" style={{width:'100%',marginBottom:8}}/>
+            <input placeholder={`Monthly savings (e.g. ${currency}5000)`} value={monthlySave} onChange={e=>setMonthlySave(e.target.value)} type="number" style={{width:'100%',marginBottom:12}}/>
+            <button onClick={calcGoal} className="glow-btn" style={{width:'100%',border:'none',borderRadius:12,padding:'12px 0',color:'white',fontWeight:700,cursor:'pointer',fontSize:14}}>
+              Calculate 🎯
+            </button>
+          </div>
+          {goalResult&&(
+            <div className="card bounce-in" style={{padding:20,marginBottom:16,textAlign:'center'}}>
+              <p style={{fontSize:40,marginBottom:8}}>{goalResult.months<=6?'🚀':goalResult.months<=12?'💪':goalResult.months<=24?'📈':'🐢'}</p>
+              <h3 className="font-display" style={{fontSize:24,fontWeight:800,color:'var(--accent2)'}}>
+                {goalResult.months} months
+              </h3>
+              <p style={{color:'var(--text2)',fontSize:13,marginBottom:16}}>to achieve your goal</p>
+              <div className="progress-bar" style={{marginBottom:12}}>
+                <div className="progress-fill" style={{width:`${goalResult.pct}%`,background:'linear-gradient(90deg,var(--accent2),var(--accent))' }}/>
+              </div>
+              <div style={{background:'rgba(99,102,241,0.1)',border:'1px solid rgba(99,102,241,0.3)',borderRadius:12,padding:12}}>
+                <p style={{fontSize:12,color:'var(--text)'}}>{goalResult.tip}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab==='scenario'&&(
+        <div>
+          <div className="card" style={{padding:16,marginBottom:16}}>
+            <h3 className="font-display" style={{fontSize:14,fontWeight:700,marginBottom:14}}>⚙️ Scenario Engine</h3>
+            {[
+              {label:`Salary change: ${salaryChg>0?'+':''}${salaryChg}%`,val:salaryChg,set:setSalaryChg,color:'#10b981'},
+              {label:`Rent increase: +${rentChg}%`,val:rentChg,set:setRentChg,color:'#ef4444'},
+              {label:`Expense change: ${expChg>0?'+':''}${expChg}%`,val:expChg,set:setExpChg,color:'#f59e0b'},
+            ].map((s,i)=>(
+              <div key={i} style={{marginBottom:14}}>
+                <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+                  <span style={{fontSize:12,color:'var(--text2)'}}>{s.label}</span>
+                </div>
+                <input type="range" min="-50" max="100" value={s.val} onChange={e=>s.set(Number(e.target.value))}
+                  style={{width:'100%',accentColor:s.color}}/>
+              </div>
+            ))}
+            <button onClick={calcScenario} className="glow-btn" style={{width:'100%',border:'none',borderRadius:12,padding:'12px 0',color:'white',fontWeight:700,cursor:'pointer',fontSize:14}}>
+              Run Scenario ⚙️
+            </button>
+          </div>
+          {scenarioResult&&(
+            <div className={`bounce-in card risk-${scenarioResult.risk}`} style={{padding:20,textAlign:'center',marginBottom:16}}>
+              <p style={{fontSize:32,marginBottom:8}}>{scenarioResult.risk==='safe'?'✅':scenarioResult.risk==='warn'?'⚠️':'🚨'}</p>
+              <p style={{fontSize:12,fontWeight:600,textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:4}}>
+                {scenarioResult.risk==='safe'?'Safe Zone':scenarioResult.risk==='warn'?'Warning Zone':'Danger Zone'}
+              </p>
+              <h3 className="font-display" style={{fontSize:26,fontWeight:800}}>
+                {fmtMoney(scenarioResult.newBalance,currency)}/mo
+              </h3>
+              <p style={{fontSize:12,marginTop:4,opacity:0.8}}>New monthly savings</p>
+              <p style={{fontSize:12,marginTop:8}}>New income: {fmtMoney(scenarioResult.newIncome,currency)}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── PROFILE PAGE ─── */
+function Profile({user,ud,setUserData,currency,theme,setTheme,doLogout,showToast}){
+  const expenses = ud?.expenses||[];
+  const level = ud?.level||1;
+  const xp = ud?.xp||0;
+  const streak = ud?.streak||0;
+  const badges = ud?.badges||[];
+  const xpPct = (xp%XP_PER_LEVEL)/XP_PER_LEVEL*100;
+
+  const earnedBadges = BADGES.filter(b=>badges.includes(b.id));
+  const lockedBadges = BADGES.filter(b=>!badges.includes(b.id));
+
+  const addTestBadge = ()=>{
+    if(!badges.includes('analyst')) setUserData({...ud,badges:[...badges,'analyst'],xp:xp+50});
+    showToast('🏆 Badge unlocked: Data Analyst!','success');
+  };
+
+  return(
+    <div className="fade-in" style={{padding:16}}>
+      {/* Profile header */}
+      <div className="hero-gradient" style={{borderRadius:20,padding:24,marginBottom:16,textAlign:'center',position:'relative'}}>
+        <div style={{width:64,height:64,borderRadius:'50%',background:'rgba(255,255,255,0.2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:28,margin:'0 auto 12px'}}>
+          {user.name[0].toUpperCase()}
+        </div>
+        <h2 className="font-display" style={{fontSize:20,fontWeight:800,color:'white'}}>{user.name}</h2>
+        <p style={{color:'rgba(255,255,255,0.6)',fontSize:12,marginBottom:12}}>SmartBudget PRO Member</p>
+        <div style={{display:'flex',justifyContent:'center',gap:16}}>
+          {[{l:'Level',v:level,icon:'⭐'},{l:'XP',v:xp,icon:'✨'},{l:'Streak',v:`${streak}d`,icon:'🔥'}].map((s,i)=>(
+            <div key={i} style={{textAlign:'center'}}>
+              <p style={{fontSize:16,fontWeight:800,color:'white'}}>{s.icon} {s.v}</p>
+              <p style={{fontSize:10,color:'rgba(255,255,255,0.6)'}}>{s.l}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{marginTop:12}}>
+          <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+            <span style={{color:'rgba(255,255,255,0.6)',fontSize:10}}>Level {level} → {level+1}</span>
+            <span style={{color:'white',fontSize:10}}>{xp%XP_PER_LEVEL}/{XP_PER_LEVEL} XP</span>
+          </div>
+          <div style={{height:6,borderRadius:99,background:'rgba(255,255,255,0.2)'}}>
+            <div style={{width:`${xpPct}%`,height:'100%',borderRadius:99,background:'#10b981',transition:'width 1s'}}/>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:16}}>
+        {[
+          {l:'Expenses',v:expenses.length,icon:'📝'},
+          {l:'This Month',v:expenses.filter(e=>e.date>=daysAgo(30)).length,icon:'📅'},
+          {l:'Badges',v:earnedBadges.length,icon:'🏆'},
+        ].map((s,i)=>(
+          <div key={i} className="card" style={{padding:12,textAlign:'center'}}>
+            <p style={{fontSize:20}}>{s.icon}</p>
+            <p style={{fontWeight:800,fontSize:18,color:'var(--accent2)'}}>{s.v}</p>
+            <p style={{color:'var(--text2)',fontSize:10}}>{s.l}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Badges */}
+      <div className="card" style={{padding:16,marginBottom:16}}>
+        <h3 className="font-display" style={{fontSize:14,fontWeight:700,marginBottom:12}}>🏆 Badges</h3>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+          {BADGES.map(b=>{
+            const earned=badges.includes(b.id);
+            return(
+              <div key={b.id} style={{padding:12,background:earned?'rgba(99,102,241,0.1)':'var(--bg3)',borderRadius:12,border:`1px solid ${earned?'rgba(99,102,241,0.4)':'var(--border)'}`,opacity:earned?1:0.5}}>
+                <p style={{fontSize:24,marginBottom:4}}>{b.icon}</p>
+                <p style={{fontWeight:700,fontSize:12}}>{b.name}</p>
+                <p style={{color:'var(--text2)',fontSize:10}}>{b.desc}</p>
+                {earned&&<span style={{fontSize:9,background:'#10b981',color:'white',padding:'2px 6px',borderRadius:6,fontWeight:700,marginTop:4,display:'inline-block'}}>EARNED</span>}
+              </div>
+            );
+          })}
+        </div>
+        <button onClick={addTestBadge} style={{marginTop:12,background:'var(--bg3)',border:'1px solid var(--border)',borderRadius:10,padding:'8px 14px',color:'var(--text2)',cursor:'pointer',fontSize:12,width:'100%'}}>
+          🎮 Simulate Badge Earn (Demo)
+        </button>
+      </div>
+
+      {/* Streak */}
+      <div className="card" style={{padding:16,marginBottom:16}}>
+        <h3 className="font-display" style={{fontSize:14,fontWeight:700,marginBottom:12}}>🔥 Saving Streak</h3>
+        <div style={{display:'flex',gap:6,justifyContent:'center',flexWrap:'wrap',marginBottom:12}}>
+          {Array.from({length:7},(_,i)=>{
+            const active=i<streak%7;
+            return <div key={i} style={{width:36,height:36,borderRadius:10,background:active?'rgba(245,158,11,0.2)':'var(--bg3)',border:`1px solid ${active?'#f59e0b':'var(--border)'}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>{active?'🔥':'⬜'}</div>
+          })}
+        </div>
+        <button onClick={()=>{const ns=(ud.streak||0)+1;const nb=[...(ud.badges||[])];if(ns>=7&&!nb.includes('streak'))nb.push('streak');setUserData({...ud,streak:ns,badges:nb});showToast('🔥 Streak extended!','success');}}
+          style={{width:'100%',background:'rgba(245,158,11,0.2)',border:'1px solid #f59e0b',borderRadius:10,padding:'10px 0',color:'#f59e0b',fontWeight:700,cursor:'pointer',fontSize:13}}>
+          ✅ Mark Today as Saved (+1 Streak)
+        </button>
+      </div>
+
+      {/* Settings */}
+      <div className="card" style={{padding:16,marginBottom:16}}>
+        <h3 className="font-display" style={{fontSize:14,fontWeight:700,marginBottom:12}}>⚙️ Settings</h3>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid var(--border)'}}>
+          <span style={{fontSize:13}}>🌙 Dark Mode</span>
+          <button onClick={()=>setTheme(t=>t==='dark'?'light':'dark')}
+            style={{width:44,height:24,borderRadius:12,background:theme==='dark'?'var(--accent2)':'var(--bg3)',border:'1px solid var(--border)',cursor:'pointer',position:'relative',transition:'background 0.3s'}}>
+            <div style={{width:18,height:18,borderRadius:'50%',background:'white',position:'absolute',top:2,left:theme==='dark'?22:2,transition:'left 0.3s'}}/>
+          </button>
+        </div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid var(--border)'}}>
+          <span style={{fontSize:13}}>💱 Currency</span>
+          <div style={{display:'flex',gap:6}}>
+            {['₹','$'].map(c=>(
+              <button key={c} onClick={()=>setCurrency&&setCurrency(c)}
+                style={{padding:'4px 12px',borderRadius:8,border:'1px solid var(--border)',background:currency===c?'var(--accent2)':'var(--bg3)',color:currency===c?'white':'var(--text)',cursor:'pointer',fontWeight:700}}>
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
+        <button onClick={doLogout} style={{width:'100%',marginTop:12,padding:'12px 0',borderRadius:12,border:'1px solid #ef4444',background:'rgba(239,68,68,0.1)',color:'#ef4444',fontWeight:700,cursor:'pointer',fontSize:14}}>
+          🚪 Sign Out
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── ADMIN PANEL ─── */
+function AdminPanel({doLogout,theme,setTheme,currency}){
+  const allUsers = ls('users',{});
+  const [users,setUsers] = useState(allUsers);
+  const [selUser,setSelUser] = useState(null);
+
+  const deleteUser = (uid)=>{
+    const updated={...users};delete updated[uid];
+    lss('users',updated);setUsers(updated);setSelUser(null);
+  };
+
+  const allExpenses = Object.entries(users).flatMap(([uid,u])=>
+    (u.expenses||[]).map(e=>({...e,userId:uid}))
+  );
+  const totalPlatformSpend = allExpenses.reduce((s,e)=>s+e.amount,0);
+  const catBreakdown = {};
+  allExpenses.forEach(e=>catBreakdown[e.category]=(catBreakdown[e.category]||0)+e.amount);
+
+  return(
+    <div style={{maxWidth:480,margin:'0 auto',padding:16,minHeight:'100vh',background:'var(--bg)'}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+        <div>
+          <p style={{color:'var(--text2)',fontSize:12}}>Admin Portal</p>
+          <h2 className="font-display" style={{fontSize:20,fontWeight:800}}>🛡️ Admin Panel</h2>
+        </div>
+        <div style={{display:'flex',gap:8}}>
+          <button onClick={()=>setTheme(t=>t==='dark'?'light':'dark')}
+            style={{background:'var(--bg3)',border:'1px solid var(--border)',borderRadius:8,padding:'6px 10px',cursor:'pointer',fontSize:14}}>
+            {theme==='dark'?'☀️':'🌙'}
+          </button>
+          <button onClick={doLogout} style={{background:'rgba(239,68,68,0.15)',border:'1px solid #ef4444',borderRadius:8,padding:'6px 12px',color:'#ef4444',cursor:'pointer',fontSize:12,fontWeight:600}}>Logout</button>
+        </div>
+      </div>
+
+      {/* Platform Stats */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:16}}>
+        {[
+          {label:'Total Users',val:Object.keys(users).length,icon:'👤',color:'#6366f1'},
+          {label:'Total Transactions',val:allExpenses.length,icon:'💳',color:'#10b981'},
+          {label:'Platform Spend',val:`${currency==='$'?'$':'₹'}${totalPlatformSpend.toLocaleString('en-IN')}`,icon:'💸',color:'#f59e0b'},
+          {label:'Avg per User',val:`${currency==='$'?'$':'₹'}${Object.keys(users).length?Math.round(totalPlatformSpend/Object.keys(users).length):0}`,icon:'📊',color:'#ef4444'},
+        ].map((s,i)=>(
+          <div key={i} className="card" style={{padding:14}}>
+            <p style={{fontSize:22,marginBottom:4}}>{s.icon}</p>
+            <p style={{color:'var(--text2)',fontSize:11}}>{s.label}</p>
+            <p style={{fontWeight:800,fontSize:16,color:s.color}}>{s.val}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Category Breakdown */}
+      <div className="card" style={{padding:16,marginBottom:16}}>
+        <h3 className="font-display" style={{fontSize:14,fontWeight:700,marginBottom:12}}>📊 Platform Category Breakdown</h3>
+        {Object.entries(catBreakdown).sort((a,b)=>b[1]-a[1]).map(([cat,amt])=>(
+          <div key={cat} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid var(--border)',fontSize:13}}>
+            <span>{CAT_ICONS[cat]||'💼'} {cat}</span>
+            <span style={{fontWeight:700,color:CAT_COLORS[cat]||'var(--accent)'}}>₹{amt.toLocaleString('en-IN')}</span>
+          </div>
+        ))}
+        {!Object.keys(catBreakdown).length&&<p style={{color:'var(--text2)',fontSize:12,textAlign:'center',padding:8}}>No data yet</p>}
+      </div>
+
+      {/* Users List */}
+      <div className="card" style={{padding:16,marginBottom:16}}>
+        <h3 className="font-display" style={{fontSize:14,fontWeight:700,marginBottom:12}}>👥 All Users</h3>
+        {Object.keys(users).length===0&&<p style={{color:'var(--text2)',fontSize:12,textAlign:'center',padding:8}}>No users registered yet</p>}
+        {Object.entries(users).map(([uid,u])=>(
+          <div key={uid}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid var(--border)'}}>
+              <div style={{display:'flex',alignItems:'center',gap:10}}>
+                <div style={{width:36,height:36,borderRadius:10,background:'rgba(99,102,241,0.2)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:14,color:'var(--accent2)'}}>
+                  {uid[0].toUpperCase()}
+                </div>
+                <div>
+                  <p style={{fontWeight:600,fontSize:13}}>{u.displayName||uid}</p>
+                  <p style={{color:'var(--text2)',fontSize:11}}>{(u.expenses||[]).length} expenses · Lv.{u.level||1} · {u.xp||0}XP</p>
+                </div>
+              </div>
+              <div style={{display:'flex',gap:6}}>
+                <button onClick={()=>setSelUser(selUser===uid?null:uid)}
+                  style={{background:'var(--bg3)',border:'1px solid var(--border)',borderRadius:8,padding:'4px 10px',cursor:'pointer',color:'var(--text)',fontSize:11}}>
+                  {selUser===uid?'Hide':'View'}
+                </button>
+                <button onClick={()=>deleteUser(uid)}
+                  style={{background:'rgba(239,68,68,0.15)',border:'1px solid #ef4444',borderRadius:8,padding:'4px 10px',cursor:'pointer',color:'#ef4444',fontSize:11}}>
+                  Del
+                </button>
+              </div>
+            </div>
+            {selUser===uid&&(
+              <div style={{padding:10,background:'var(--bg3)',borderRadius:10,margin:'6px 0'}}>
+                <p style={{fontSize:12,fontWeight:700,color:'var(--text2)',marginBottom:6}}>RECENT EXPENSES</p>
+                {(u.expenses||[]).slice(-5).reverse().map((e,i)=>(
+                  <div key={i} style={{display:'flex',justifyContent:'space-between',fontSize:12,padding:'4px 0'}}>
+                    <span>{CAT_ICONS[e.category]} {e.category} {e.note?`· ${e.note}`:''}</span>
+                    <span style={{fontWeight:600}}>₹{e.amount}</span>
+                  </div>
+                ))}
+                {!(u.expenses||[]).length&&<p style={{color:'var(--text2)',fontSize:11}}>No expenses</p>}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

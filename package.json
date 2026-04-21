@@ -1,15 +1,15 @@
 {
-  "name": "backend",
+  "name": "arthsathi-backend",
   "version": "1.0.0",
-  "description": "Backend for ArthSathi AI",
-  "main": "server.js",
+  "description": "",
+  "main": "index.js",
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
-  "keywords": [],
   "type": "commonjs",
   "dependencies": {
     "bcryptjs": "^3.0.3",
